@@ -25,6 +25,9 @@ public class MazeGenerator {
                 this.mMaze[x][y] = new Cell();
 
         generateMaze(0, 0);
+
+        mMaze[0][0].walls[Directions.UP.ordinal()] = false;
+        mMaze[mSize - 1][mSize - 1].walls[Directions.DOWN.ordinal()] = false;
     }
 
     public void generateMaze(int x, int y)
@@ -34,7 +37,7 @@ public class MazeGenerator {
 
         Cell[] neighbors = new Cell[4];
         int[] dx = {0, 1, 0, -1};
-        int[] dy = {-1, 0, 1, 0}; // Up, Right, Down, Left
+        int[] dy = {-1, 0, 1, 0};
         Directions[] directions = {Directions.UP, Directions.RIGHT, Directions.DOWN, Directions.LEFT};
 
         Collections.shuffle(Arrays.asList(directions));

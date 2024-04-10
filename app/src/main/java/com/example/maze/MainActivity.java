@@ -2,6 +2,10 @@ package com.example.maze;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.GridLayout;
@@ -15,11 +19,13 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements SensorEventListener {
 
     private int mMazeSize;
-
     private MazeView mMazeView;
+    private SensorManager mSensorManager;
+    private Sensor mAccelerometer;
+    private Boolean mGameStarted;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,7 +44,35 @@ public class MainActivity extends AppCompatActivity {
 
         LinearLayout ll = findViewById(R.id.main);
         ll.addView(mMazeView);
+
+        mSensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
+        mAccelerometer = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+
+        mGameStarted = false;
     }
+
+    protected void onResume() {
+        super.onResume();
+        mSensorManager.registerListener(this, mAccelerometer, SensorManager.SENSOR_DELAY_NORMAL);
+    }
+
+    protected void onPause() {
+        super.onPause();
+        mSensorManager.unregisterListener(this);
+    }
+
+    @Override
+    public void onSensorChanged(SensorEvent se) {
+        if(mGameStarted && se.sensor.equals(mAccelerometer)) {
+            float xValue = se.values[0];
+            float yValue = se.values[1];
+            float zValue = se.values[2];
+            mMazeView.addPointToPath(xValue, yValue);
+        }
+    }
+
+    @Override
+    public void onAccuracyChanged(Sensor sensor, int i) {}
 
     ActivityResultLauncher<Intent> mStartForResult = registerForActivityResult(
             new ActivityResultContracts.StartActivityForResult(),
@@ -53,7 +87,7 @@ public class MainActivity extends AppCompatActivity {
             });
 
     public void playGame(View v) {
-
+        mGameStarted = true;
     }
 
     public void generateMaze(View v) {
